@@ -3,43 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <title>Contries Query</title>
-    <script
-      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
-      crossorigin="anonymous"
-    ></script>
   </head>
   <body>
-    <table id="resultTable" class="table table-bordered">
-      <thead>
-        <th>國旗</th>
-        <th>國家名稱</th>
-        <th>2位國家代碼</th>
-        <th>3位國家代碼</th>
-        <th>母語名稱</th>
-        <th>替代國家名稱</th>
-        <th>國際電話區號</th>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div>
+      國家名稱<input type="text" id="Q_CountryName" />
+      <button id="btSearch" type="button">查詢</button>
+    </div>
 
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
-      crossorigin="anonymous"
-    />
+    <div>
+      <table id="resultTable">
+        <thead>
+          <th>國旗</th>
+          <th>國家名稱</th>
+          <th>2位國家代碼</th>
+          <th>3位國家代碼</th>
+          <th>母語名稱</th>
+          <th>替代國家名稱</th>
+          <th>國際電話區號</th>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
     <script>
-      var contries = [];
-      $(function () {
+      var countries = [];
+      var displayCountries = [];
+      window.onload = function () {
         GetCountryData();
-      });
+        document.getElementById('btSearch').onclick = function () {
+          GenerateTableRow(20, 1);
+        };
+      };
 
       // 取得國家資料
       function GetCountryData() {
@@ -47,8 +41,8 @@
           type: 'GET',
           url: 'https://restcountries.eu/rest/v2/all',
           onSuccess: function (result) {
-            contries = JSON.parse(result);
-            GenerateTableRow();
+            countries = JSON.parse(result);
+            GenerateTableRow(20, 1);
           },
           onError() {},
         });
@@ -78,12 +72,22 @@
       }
 
       // 綁定資料至Table內
-      function GenerateTableRow() {
+      function GenerateTableRow(limit, page) {
+        // 根據國家名稱篩選
+        displayCountries = countries.filter((value, index) => {
+          let countryName = document.getElementById('Q_CountryName').value;
+          if (countryName) {
+            return value.name.includes(countryName);
+          } else {
+            return value;
+          }
+        });
+
         let tb = document.querySelector('#resultTable tbody');
         tb.innerHTML = ''; // 清空內容
         let t = document.querySelector('#countryrow'); // Template Table row
         let td = t.content.querySelectorAll('td'); // table td items
-        contries.forEach((element) => {
+        displayCountries.forEach((element) => {
           td[0].querySelector('img').src = element.flag;
           td[1].textContent = element.name;
           td[2].textContent = element.alpha2Code;
