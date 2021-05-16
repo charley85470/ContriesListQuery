@@ -38,27 +38,47 @@
     <script>
       var contries = [];
       $(function () {
-        BindTable();
+        GetCountryData();
       });
 
-      function BindTable() {
-        SendAjax();
+      // 取得國家資料
+      function GetCountryData() {
+        SendAjax({
+          type: 'GET',
+          url: 'https://restcountries.eu/rest/v2/all',
+          onSuccess: function (result) {
+            contries = JSON.parse(result);
+            GenerateTableRow();
+          },
+          onError() {},
+        });
       }
 
-      function SendAjax() {
+      // 建立Ajax連線
+      function SendAjax({
+        type: type, // HTTP Type
+        url: url, // Connect URL
+        onSuccess: onSuccess, // Function when Call API Success
+        onError: onError, // Function when Call API Error
+      }) {
         var oReq = new XMLHttpRequest();
 
-        //oReq.addEventListener('progress', updateProgress);
-        oReq.addEventListener('load', transferComplete);
-        //oReq.addEventListener('error', transferFailed);
-        //oReq.addEventListener('abort', transferCanceled);
+        // Event On Load Success
+        oReq.addEventListener('load', function () {
+          onSuccess(this.response);
+        });
 
-        oReq.open('GET', 'https://restcountries.eu/rest/v2/all');
-        oReq.send();
+        // Event On Load Error
+        oReq.addEventListener('error', function () {
+          onError(this.response);
+        });
+
+        oReq.open(type, url); // Open Connection
+        oReq.send(); // Send Request
       }
 
-      function transferComplete() {
-        contries = JSON.parse(this.responseText);
+      // 綁定資料至Table內
+      function GenerateTableRow() {
         let tb = document.querySelector('#resultTable tbody');
         tb.innerHTML = ''; // 清空內容
         let t = document.querySelector('#countryrow'); // Template Table row
