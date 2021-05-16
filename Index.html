@@ -25,15 +25,7 @@
         <th>替代國家名稱</th>
         <th>國際電話區號</th>
       </thead>
-      <tbody>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tbody>
+      <tbody></tbody>
     </table>
 
     <link
@@ -67,7 +59,36 @@
 
       function transferComplete() {
         contries = JSON.parse(this.responseText);
+        let tb = document.querySelector('#resultTable tbody');
+        tb.innerHTML = ''; // 清空內容
+        let t = document.querySelector('#countryrow'); // Template Table row
+        let td = t.content.querySelectorAll('td'); // table td items
+        contries.forEach((element) => {
+          td[0].querySelector('img').src = element.flag;
+          td[1].textContent = element.name;
+          td[2].textContent = element.alpha2Code;
+          td[3].textContent = element.alpha3Code;
+          td[4].textContent = element.nativeName;
+          td[5].textContent = element.altSpellings;
+          td[6].textContent = element.callingCodes;
+
+          tb.appendChild(document.importNode(t.content, true)); // DeepClone 並Appent到Tbody中
+        });
       }
     </script>
+
+    <template id="countryrow">
+      <tr>
+        <td>
+          <img style="max-height: 2rem" src="" alt="" />
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
   </body>
 </html>
