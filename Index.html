@@ -23,11 +23,41 @@
         </thead>
         <tbody></tbody>
       </table>
+      <div id="pages">
+        <ul class="pagination"></ul>
+      </div>
     </div>
+
+    <style>
+      .pagination {
+        display: inline-block;
+        padding-left: 0;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+
+      .pagination > li {
+        display: inline;
+      }
+
+      .pagination > li > a {
+        position: relative;
+        float: left;
+        padding: 1rem;
+        color: teal;
+        text-decoration: none;
+        background-color: #fff;
+        border: 1px solid #ddd;
+      }
+
+      .pagination > li > a:hover {
+        background-color: gray;
+        color: white;
+      }
+    </style>
 
     <script>
       var countries = [];
-      var displayCountries = [];
       window.onload = function () {
         GetCountryData();
         document.getElementById('btSearch').onclick = function () {
@@ -71,10 +101,27 @@
         oReq.send(); // Send Request
       }
 
+      function GetPagedData(source, limit, page) {
+        let start = limit * (page - 1); // 起始
+        let end = start + limit; // 結束
+
+        if (end > source.length) {
+          end = source.length;
+        }
+
+        return {
+          total: source.length,
+          currentPage: page,
+          totalPage: parseInt(source.length / limit) + 1,
+          limit: limit,
+          data: source.slice(start, end),
+        };
+      }
+
       // 綁定資料至Table內
       function GenerateTableRow(limit, page) {
         // 根據國家名稱篩選
-        displayCountries = countries.filter((value, index) => {
+        let filteredData = countries.filter((value, index) => {
           let countryName = document.getElementById('Q_CountryName').value;
           if (countryName) {
             return value.name.includes(countryName);
@@ -83,11 +130,13 @@
           }
         });
 
+        let resultData = GetPagedData(filteredData, limit, page);
+
         let tb = document.querySelector('#resultTable tbody');
         tb.innerHTML = ''; // 清空內容
         let t = document.querySelector('#countryrow'); // Template Table row
         let td = t.content.querySelectorAll('td'); // table td items
-        displayCountries.forEach((element) => {
+        resultData.data.forEach((element) => {
           td[0].querySelector('img').src = element.flag;
           td[1].textContent = element.name;
           td[2].textContent = element.alpha2Code;
@@ -98,6 +147,51 @@
 
           tb.appendChild(document.importNode(t.content, true)); // DeepClone 並Appent到Tbody中
         });
+
+        GeneratePageList(resultData.currentPage, resultData.totalPage);
+      }
+
+      function GeneratePageList(currentPage, totalPage) {
+        let pageElement = document.querySelector('#pages > ul.pagination');
+        pageElement.innerHTML = ''; // 清空
+        let htmlStr = '';
+        htmlStr +=
+          '<li class="page-prev"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>';
+
+        if (currentPage > 5) {
+          htmlStr +=
+            '<li class="prev5"><a href="#"><span aria-hidden="true">...</span></a></li>';
+        }
+
+        for (let i = currentPage; i < currentPage + 5; i++) {
+          if (i <= totalPage) {
+            htmlStr +=
+              '<li class="page-item" data-page=' +
+              i +
+              '><a href="#"><span aria-hidden="true">' +
+              i +
+              '</span></a></li>';
+          } else {
+            break;
+          }
+        }
+
+        if (currentPage < totalPage - 5) {
+          htmlStr +=
+            '<li class="next5"><a href="#"><span aria-hidden="true">...</span></a></li>';
+        }
+        htmlStr +=
+          '<li class="page-next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>';
+        pageElement.innerHTML = htmlStr;
+
+        let li = pageElement
+          .querySelectorAll('li.page-item')
+          .forEach((element) => {
+            element.addEventListener('click', (event) => {
+              let topage = element.dataset.page;
+              GenerateTableRow(20, parseInt(topage));
+            });
+          });
       }
     </script>
 
@@ -113,6 +207,26 @@
         <td></td>
         <td></td>
       </tr>
+    </template>
+
+    <template>
+      <ul class="pagination">
+        <li class="page-prev">
+          <a href="#" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <li><a href="#"></a></li>
+        <li><a href="#"></a></li>
+        <li><a href="#"></a></li>
+        <li><a href="#"></a></li>
+        <li><a href="#"></a></li>
+        <li class="page-next">
+          <a href="#" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
     </template>
   </body>
 </html>
