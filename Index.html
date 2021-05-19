@@ -50,18 +50,20 @@
         border: 1px solid #ddd;
       }
 
-      .pagination > li > a:hover {
+      .pagination > li > a:hover,
+      .pagination > li.active > a {
         background-color: gray;
         color: white;
       }
     </style>
 
     <script>
-      var countries = [];
+      let countries = [];
+      let pageSize = 25;
       window.onload = function () {
         GetCountryData();
         document.getElementById('btSearch').onclick = function () {
-          GenerateTableRow(20, 1);
+          GenerateTableRow(pageSize, 1);
         };
       };
 
@@ -72,7 +74,7 @@
           url: 'https://restcountries.eu/rest/v2/all',
           onSuccess: function (result) {
             countries = JSON.parse(result);
-            GenerateTableRow(20, 1);
+            GenerateTableRow(pageSize, 1);
           },
           onError() {},
         });
@@ -112,7 +114,7 @@
         return {
           total: source.length,
           currentPage: page,
-          totalPage: parseInt(source.length / limit) + 1,
+          totalPage: Math.ceil(source.length / limit),
           limit: limit,
           data: source.slice(start, end),
         };
@@ -148,50 +150,56 @@
           tb.appendChild(document.importNode(t.content, true)); // DeepClone 並Appent到Tbody中
         });
 
-        GeneratePageList(resultData.currentPage, resultData.totalPage);
+        GeneratePageList(resultData);
       }
 
-      function GeneratePageList(currentPage, totalPage) {
+      function GeneratePageList(pagedData) {
+        let currentPage = pagedData.currentPage;
+        let totalPage = pagedData.totalPage;
         let pageElement = document.querySelector('#pages > ul.pagination');
         pageElement.innerHTML = ''; // 清空
         let htmlStr = '';
-        htmlStr +=
-          '<li class="page-prev"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>';
 
-        if (currentPage > 5) {
-          htmlStr +=
-            '<li class="prev5"><a href="#"><span aria-hidden="true">...</span></a></li>';
-        }
-
-        for (let i = currentPage; i < currentPage + 5; i++) {
-          if (i <= totalPage) {
-            htmlStr +=
-              '<li class="page-item" data-page=' +
-              i +
-              '><a href="#"><span aria-hidden="true">' +
-              i +
-              '</span></a></li>';
-          } else {
-            break;
-          }
-        }
-
-        if (currentPage < totalPage - 5) {
-          htmlStr +=
-            '<li class="next5"><a href="#"><span aria-hidden="true">...</span></a></li>';
+        // 前一頁
+        let prev = currentPage - 1;
+        if (prev <= 0) {
+          prev = totalPage;
         }
         htmlStr +=
-          '<li class="page-next"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>';
+          '<li class="page-prev" data-page="' +
+          prev +
+          '"><a href="#" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a></li>';
+
+        // 頁數
+        for (let i = 1; i <= totalPage; i++) {
+          htmlStr +=
+            '<li class="page-item ' +
+            (i === parseInt(currentPage) ? 'active' : '') +
+            '" data-page="' +
+            i +
+            '"><a href="#"><span aria-hidden="true">' +
+            i +
+            '</span></a></li>';
+        }
+
+        // 後一頁
+        let next = currentPage + 1;
+        if (next > totalPage) {
+          next = 1;
+        }
+        htmlStr +=
+          '<li class="page-next" data-page="' +
+          next +
+          '"><a href="#" aria-label="Next"><span aria-hidden="true">&raquo;</span></a></li>';
         pageElement.innerHTML = htmlStr;
 
-        let li = pageElement
-          .querySelectorAll('li.page-item')
-          .forEach((element) => {
-            element.addEventListener('click', (event) => {
-              let topage = element.dataset.page;
-              GenerateTableRow(20, parseInt(topage));
-            });
+        // 頁數切換事件
+        pageElement.querySelectorAll('li').forEach((element) => {
+          element.addEventListener('click', (event) => {
+            let topage = element.dataset.page;
+            GenerateTableRow(pagedData.limit, parseInt(topage));
           });
+        });
       }
     </script>
 
