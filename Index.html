@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="width: 100%">
   <head>
     <meta charset="UTF-8" />
     <title>Contries Query</title>
   </head>
-  <body>
+  <body style="width: 100%; margin: 0px">
     <div>
       國家名稱<input type="text" id="Q_CountryName" />
       <button id="btSearch" type="button">查詢</button>
@@ -25,6 +25,33 @@
       </table>
       <div id="pages">
         <ul class="pagination"></ul>
+      </div>
+    </div>
+
+    <div id="country-detail" class="modal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <img style="max-height: 2rem" data-field="flag" src="" alt="" />
+          <span data-field="name"></span>
+          <span data-toggle="#country-detail" style="float: right">X</span>
+        </div>
+        <div class="modal-content">
+          <div>A</div>
+          <div>B</div>
+          <div>C</div>
+          <div>D</div>
+          <div>E</div>
+          <div>F</div>
+          <div>G</div>
+          <div>H</div>
+          <div>I</div>
+          <div>I</div>
+          <div>I</div>
+          <div>I</div>
+          <div>I</div>
+          <div>I</div>
+          <div>I</div>
+        </div>
       </div>
     </div>
 
@@ -55,6 +82,42 @@
         background-color: gray;
         color: white;
       }
+
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: #cccccccc;
+        z-index: 1000;
+        display: none;
+      }
+
+      .modal.show {
+        display: block;
+      }
+
+      .modal .modal-container {
+        background: white;
+        border: 1px solid gray;
+        width: 50%;
+        z-index: 1050;
+        position: absolute;
+        top: 10%;
+        left: 25%;
+      }
+
+      .modal .modal-header {
+        height: 2rem;
+        border-bottom: 1px solid gray;
+        padding: 1rem;
+      }
+
+      .modal .modal-content {
+        min-height: 10rem;
+        padding: 1rem;
+      }
     </style>
 
     <script>
@@ -62,6 +125,7 @@
       let pageSize = 25;
       window.onload = function () {
         GetCountryData();
+        InitModal();
         document.getElementById('btSearch').onclick = function () {
           GenerateTableRow(pageSize, 1);
         };
@@ -141,13 +205,21 @@
         resultData.data.forEach((element) => {
           td[0].querySelector('img').src = element.flag;
           td[1].textContent = element.name;
+          td[1].dataset.alpha3Code = element.alpha3Code;
           td[2].textContent = element.alpha2Code;
           td[3].textContent = element.alpha3Code;
           td[4].textContent = element.nativeName;
           td[5].textContent = element.altSpellings;
-          td[6].textContent = element.callingCodes;
+          td[6].textContent = element.callingCodes.join(',');
 
           tb.appendChild(document.importNode(t.content, true)); // DeepClone 並Appent到Tbody中
+        });
+
+        // 國家名稱點擊事件
+        tb.querySelectorAll('.ref-country-detail').forEach((element) => {
+          element.addEventListener('click', (event) => {
+            ShowCountryDetail(element.dataset.alpha3Code);
+          });
         });
 
         GeneratePageList(resultData);
@@ -201,6 +273,31 @@
           });
         });
       }
+
+      function ShowCountryDetail(alpha3Code) {
+        SendAjax({
+          type: 'GET',
+          url: 'https://restcountries.eu/rest/v2/alpha/' + alpha3Code,
+          onSuccess: function (result) {
+            let resultData = JSON.parse(result);
+            let modal = document.querySelector('#country-detail');
+            modal.querySelector("[data-field='flag']").src = resultData.flag;
+            modal.querySelector("[data-field='name']").textContent =
+              resultData.name;
+            modal.classList.add('show');
+          },
+          onError() {},
+        });
+      }
+
+      function InitModal() {
+        let modal = document.querySelector('#country-detail');
+        modal.querySelectorAll('[data-toggle]').forEach((element) => {
+          element.addEventListener('click', function () {
+            modal.classList.remove('show');
+          });
+        });
+      }
     </script>
 
     <template id="countryrow">
@@ -208,7 +305,7 @@
         <td>
           <img style="max-height: 2rem" src="" alt="" />
         </td>
-        <td></td>
+        <td class="ref-country-detail"></td>
         <td></td>
         <td></td>
         <td></td>
