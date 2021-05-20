@@ -1,0 +1,114 @@
+table.table-bordered {
+  border-collapse: collapse;
+  border: 1px solid #aaa;
+}
+
+table.table-bordered thead {
+  background-color: rgb(177, 198, 238);
+}
+
+table.table-bordered th {
+  font-weight: 900;
+}
+
+table.table-bordered thead tr {
+  border-bottom: 1px solid #aaa;
+}
+
+table.table-bordered tbody tr:nth-child(2n) {
+  background-color: #f2f2f2;
+}
+
+table.table-bordered tbody tr + tr {
+  border-top: 1px solid #aaa;
+}
+
+table.table-bordered th + th,
+table.table-bordered td + td {
+  border-left: 1px solid #aaa;
+}
+
+img.flag {
+  max-height: 2rem;
+  border: 1px solid black;
+}
+
+.pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: 20px 0;
+  border-radius: 4px;
+}
+
+.pagination > li {
+  display: inline;
+}
+
+.pagination > li > a {
+  position: relative;
+  float: left;
+  padding: 1rem;
+  color: teal;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.pagination > li > a:hover,
+.pagination > li.active > a {
+  background-color: gray;
+  color: white;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: #cccccccc;
+  z-index: 1000;
+  display: none;
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal .modal-container {
+  background: white;
+  border: 1px solid gray;
+  width: 50%;
+  z-index: 1050;
+  position: absolute;
+  top: 10%;
+  left: 25%;
+}
+
+.modal .modal-header {
+  height: 2rem;
+  border-bottom: 1px solid gray;
+  padding: 1rem;
+}
+
+.modal .modal-content {
+  min-height: 10rem;
+  padding: 1rem;
+}
+
+.form-group {
+  display: flex;
+  align-items: center;
+}
+
+.form-group .title {
+  width: 5rem;
+  text-align: right;
+  padding: 5px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.form-group .content {
+  padding: 5px;
+}
